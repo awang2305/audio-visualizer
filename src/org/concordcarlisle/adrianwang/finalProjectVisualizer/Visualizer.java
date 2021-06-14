@@ -58,7 +58,8 @@ public class Visualizer {
 		    int frameSize = (int) ais.getFormat().getFrameSize();
 		    byte[] eightBitByteArray = new byte[frameLength * frameSize];
 		
-		    int result = ais.read(eightBitByteArray);
+		    @SuppressWarnings("unused")
+			int result = ais.read(eightBitByteArray);
 		
 		    int channels = ais.getFormat().getChannels();
 		    int[][] samples = new int[channels][frameLength];
@@ -109,10 +110,8 @@ public class Visualizer {
 		    spliced = new LinkedList<>();
 		    spliceSamples(samples, spliced);
 		    
-		   // System.out.println("scaledsamples length: " + scaledSamples[0].length);
-		    //System.out.println(GUI.GRAPH_WIDTH / 10 * samples[0].length / 17);
+		    // print tracing
 		    
-		    //print test del later
 		    String firstRow = "[";
 		    int count = 0;
 		    for(int i = 0; i < spliced.peek()[0].length; i++) {
@@ -225,26 +224,15 @@ public class Visualizer {
 	
 	// creates a flat, cartesian, graph from amplitude sample data
 	public void graphNext(Graphics g) {
-		// TODO: attempting to fix lag (doesn't work right now)
-//		double playTimeMillis = System.currentTimeMillis() - startTimeMillis;
 		
-		
-//		if(Math.abs((playTimeMillis / startTimeMillis) - (soundDurationMillis / GUI.FRAME_RATE - spliced.size()) / (soundDurationMillis / GUI.FRAME_RATE)) > 0.1) {
-//			while(Math.abs((playTimeMillis / startTimeMillis) - (soundDurationMillis / GUI.FRAME_RATE - spliced.size()) / (soundDurationMillis / GUI.FRAME_RATE)) > 0.1) {
-//				spliced.poll();
-//			}
-//		}
 		int[][] nextSegment = spliced.poll().clone();
-		//g.setColor(Color.CYAN);
 		for(int r = 0; r < nextSegment.length; r++) {
 			g.setColor(new Color(Color.HSBtoRGB((float)(0.9 + 0.1 * r), 1, 1)));
 			
 			for(int c = 0; c < nextSegment[0].length - 1; c++) {
 				double y = (GUI.HEIGHT) / 2 - ((double)nextSegment[r][c] / (sampleMax) * GUI.GRAPH_HEIGHT);
-//				double y1 = (GUI.HEIGHT) / 2 - ((double)nextSegment[r][c+1] / (scaledMax) * GUI.GRAPH_HEIGHT);
 				
 				double x = (double)c / (nextSegment[0].length - 1) * GUI.GRAPH_WIDTH;
-//				double x1 = (double)(c+1) / (nextSegment[0].length - 1) * GUI.GRAPH_WIDTH;
 				g.drawOval((int)x, (int)y, 3, 3);
 			}
 		}
@@ -267,10 +255,7 @@ public class Visualizer {
 			for(int c = 0; c < nextSegment[0].length - 1; c++) {
 				double radius = (double)polarGraphRadius + ((double)nextSegment[r][c] / (sampleMax) * polarSemiRange);
 				int size = 3;
-//				if(radius < polarGraphRadius) {
-//					radius = (double)polarGraphRadius + ((double)nextSegment[r][c] / Math.abs(sampleMin) * 200);
-//					
-//				}
+//				
 				double angleRad = (double)c / (nextSegment[0].length - 1) * Math.PI;
 				
 				double y = GUI.HEIGHT / 2 - radius * Math.cos(angleRad);
@@ -278,7 +263,6 @@ public class Visualizer {
 				
 				double x1 = GUI.WIDTH / 2 - radius * Math.sin(angleRad);
 				
-				//System.out.println("(" + x + ", " + y + ")");
 				g.drawOval((int)x, (int)y, size, size);
 				g.drawOval((int)x1, (int)y, size, size);
 
@@ -294,28 +278,12 @@ public class Visualizer {
 		Complex[][] nextSegment = transformed.poll().clone();
 		
 		
-		
 		for(int r = 0; r < nextSegment.length; r++) {
 			Color graphColor = new Color(Color.HSBtoRGB((float)(0.5 + 0.1 * r), 1, 1));
 			g.setColor(graphColor);
 			
 			for(int c = 0; c < nextSegment[0].length - 1; c++) {
-//				double radius = (double)polarGraphRadius + ((double)nextSegment[r][c] / (transMax) * polarSemiRange);
-				
-////				if(radius < polarGraphRadius) {
-////					radius = (double)polarGraphRadius + ((double)nextSegment[r][c] / Math.abs(sampleMin) * 200);
-////					
-////				}
-//				double angleRad = (double)c / (nextSegment[0].length - 1) * Math.PI;
-//				
 
-//				
-
-				
-				//System.out.println("(" + x + ", " + y + ")");
-				
-//				double x = GUI.WIDTH / 2 + (nextSegment[r][c].re() / transRealMax) * (GUI.WIDTH / 2);
-//				double y = GUI.HEIGHT / 2 - (nextSegment[r][c].im() / transImagMax) * (GUI.HEIGHT / 2);
 				
 				double angleRad = Math.atan(nextSegment[r][c].im() / nextSegment[r][c].re());
 				double radius = (double)polarGraphRadius + ((double)nextSegment[r][c].abs() / transAbsMax * polarSemiRange);
@@ -323,18 +291,11 @@ public class Visualizer {
 				double x = GUI.WIDTH / 2 + radius * Math.cos(angleRad);
 				double x1 = GUI.WIDTH / 2 - radius * Math.cos(angleRad);
 
-				double radiusNext = (double)polarGraphRadius + ((double)nextSegment[r][c + 1].abs() / transAbsMax * polarSemiRange);
 				double angleNext = angleRad +  Math.PI / nextSegment[0].length * 2; 
 				
 				
-
-				//int size = (int)(3*radius / polarGraphRadius);
-
 				int size = 3;
-//				Graphics2D g2d = (Graphics2D)g.create();
-//	            g2d.setStroke(new BasicStroke(size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-//				g2d.drawLine((int)x, (int)y, (int)xNext, (int)yNext);
-//				g2d.drawLine((int)x1, (int)y, (int)x1Next, (int)yNext);
+
 				if((radius - polarGraphRadius)/ polarSemiRange <= 0.005) {
 					g.setColor(new Color(graphColor.getRed(), graphColor.getGreen(), graphColor.getBlue(), 40));
 					
@@ -358,7 +319,6 @@ public class Visualizer {
 	
 	// derives the fourier transform from amplitude sample data
 	private void toFourier(LinkedList<int[][]> target, LinkedList<Complex[][]> result) {
-		//LinkedList<int[][]> result = new LinkedList<>();
 		
 		transRealMax = Double.MIN_VALUE;
 		transImagMax = Double.MIN_VALUE;
@@ -381,51 +341,6 @@ public class Visualizer {
 				}
 			}
 			for(int r = 0; r < curr.length; r++) {
-//				int avg = 0;
-//				for(int c = 0; c < curr[0].length; c++) {
-//					avg += Math.abs(curr[r][c]);
-//				}
-//				avg /= curr[0].length;
-				
-//				for(int c = 0; c < curr[0].length; c++) {
-//					//double t = (i * curr[0].length + c + 1) / (target.size() * curr[0].length) * soundDurationMillis;
-//					
-//					//Math: avg * f(t) * e^(-2 * PI * i * f * t)
-////					
-////					Complex coord = new Complex(0, -2 * Math.PI / curr[0].length * c);
-////					coord = coord.exp();
-////					coord = coord.scale(avg * curr[r][c]);
-////					
-////					segment[r][c] = coord;
-//					
-//					//segment[r][c] = (int)(avg * curr[r][c] * Math.exp(-2 * Math.PI / curr[0].length * c));
-//					//System.out.println(segment[r][c]);
-////					 Tk += (T[l])*np.exp((-2j*np.pi*k*l)/N)
-//					
-//					// Code from stackoverflow:
-//					Complex tC = new Complex(0, 0);
-//					for(int k = 0; k < curr[0].length; k++) {
-//						tC = tC.plus(new Complex(0, -2 * Math.PI * c * k).scale(1.0 / curr[0].length).exp().scale(curr[r][k]));
-//						
-//						//tC += curr[r][k] * Math.exp(-2 * Math.PI * c * k);
-//					}
-//					
-//					segment[r][c] = tC;
-////					
-//					if(segment[r][c].re() > transRealMax) transRealMax = (int)segment[r][c].re();
-//					if(segment[r][c].im() > transImagMax) transImagMax = (int)segment[r][c].im();
-//					
-//					if(segment[r][c].abs() > transAbsMax) {
-//						
-//						transAbsMax = segment[r][c].abs();
-//						transRealMax = segment[r][c].re();
-//						transImagMax = segment[r][c].im();
-//					}
-//					
-//
-//					//segment[r][c] *= c;
-//					
-//				}
 				
 				segment[r] = FFT.fft(segment[r]);
 			}
